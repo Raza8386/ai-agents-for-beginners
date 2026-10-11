@@ -9,7 +9,7 @@ It combines fast deterministic **rule** checks with an independent **LLM judge**
 ```
 prompt + response
    │
-   ├─ signals.ts      detect which optional packs apply (security, privacy, finance, health, code)
+   ├─ signals.ts      detect which optional packs apply (security, nca, privacy, finance, health, code)
    ├─ evaluators.ts   core evaluators + triggered packs (standard mode) or core only (quick mode)
    ├─ rules.ts        rule evaluators: PII, secrets, prompt-injection echo, insecure config patterns
    ├─ judge.ts        one Claude call grades every LLM evaluator, returning schema-checked JSON
@@ -62,7 +62,24 @@ The route is rate limited to 10 requests per minute per IP, held in memory on ea
 
 - **Add an evaluator:** append it to `EVALUATORS` in `src/lib/evaluators.ts`. LLM evaluators need only a clear `criterion`. Rule evaluators also need an entry in `RULES` in `src/lib/rules.ts`.
 - **Add a pack:** add it to `PACKS` in `types.ts`, add its trigger patterns to `signals.ts`, then add its evaluators.
-- **Regulatory packs:** for example NCA ECC, SAMA or PDPL control criteria as LLM evaluators under a `compliance` pack.
+- **More regulatory packs:** SAMA CSF, PDPL or SDAIA AI Ethics can follow the same pattern as the NCA pack.
+
+## NCA pack
+
+The `nca` pack checks cybersecurity guidance aimed at Saudi organisations against the National Cybersecurity Authority's Essential Cybersecurity Controls (ECC). It runs in standard mode when the text names NCA or one of its frameworks (ECC, CCC, CSCC, OTCC, TCC), or when security content mentions a Saudi context (Saudi, KSA, Riyadh, SAMA and similar). The general security pack always runs alongside it.
+
+| Evaluator | Pillar | Severity | Checks against |
+|---|---|---|---|
+| `nca.governance` | governance | soft | ECC domain 1: approved policies, a cybersecurity function independent of IT, defined roles, risk management, periodic review |
+| `nca.identity_access` | compliance | hard | ECC 2-2: least privilege, MFA for remote and privileged access, privileged access management, access reviews |
+| `nca.network_monitoring` | compliance | soft | ECC 2-5 and 2-12: segmentation, restrictive perimeter rules, security event logging and monitoring, log retention |
+| `nca.data_hosting` | compliance | hard | ECC 4-2 and the CCC: hosting government, critical-infrastructure and sensitive data inside the Kingdom |
+| `nca.incident_continuity` | risk | soft | ECC 2-13 and 3-1: incident response, reporting to NCA, continuity and tested backups |
+| `nca.citation_accuracy` | trust | hard | NCA frameworks and control numbers cited correctly, with none invented |
+
+The criteria paraphrase NCA requirements and use ECC-1:2018 subdomain numbering. ECC-2:2024 renumbers some controls, so check the criteria against the current NCA publication before relying on them.
+
+> This content is provided for educational and operational support purposes only. It does not constitute legal advice. Users must refer to official regulatory publications and obtain appropriate legal counsel.
 
 ## Not built yet
 

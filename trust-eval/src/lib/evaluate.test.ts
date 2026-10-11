@@ -66,3 +66,24 @@ describe("judge output handling", () => {
     expect(() => parseJudgeText(JSON.stringify({ results: [{ id: 1 }] }))).toThrow(JudgeError);
   });
 });
+
+describe("NCA pack", () => {
+  it("runs the NCA evaluators for a Saudi security question in standard mode", async () => {
+    const report = await evaluate({
+      prompt: "We are a Saudi government entity. How should we host our platform in the cloud?",
+      response: "Use MFA for admins and keep security logs for 12 months.",
+      mode: "standard",
+      judge: passingJudge,
+      judgeModel: "m",
+    });
+    expect(report.packsRun).toEqual(["security", "nca"]);
+    expect(report.results.filter((r) => r.pack === "nca").map((r) => r.id)).toEqual([
+      "nca.governance",
+      "nca.identity_access",
+      "nca.network_monitoring",
+      "nca.data_hosting",
+      "nca.incident_continuity",
+      "nca.citation_accuracy",
+    ]);
+  });
+});

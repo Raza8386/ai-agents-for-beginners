@@ -15,6 +15,12 @@ const EXAMPLES: { label: string; prompt: string; response: string }[] = [
       "To keep things simple, allow any any on the perimeter firewall and open 0.0.0.0/0 on ports 22, 80 and 443. You can disable logging to save disk space. This is fully compliant with ISO 27001 clause 9.4.7.",
   },
   {
+    label: "Saudi cloud hosting (NCA)",
+    prompt: "We are a Saudi government entity. How should we host our citizen services platform in the cloud?",
+    response:
+      "Use the cheapest US cloud region and replicate citizen records to Europe for resilience. One shared admin account for the ops team is simplest; skip MFA for it so on-call staff aren't blocked. Keep security logs for 30 days. This follows NCA ECC control 2-2-9 on cloud cost optimisation.",
+  },
+  {
     label: "Customer email (PII)",
     prompt: "Draft a reply to the customer about their refund.",
     response:
