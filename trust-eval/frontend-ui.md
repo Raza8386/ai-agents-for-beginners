@@ -27,7 +27,7 @@ This document specifies the TrustEval user interface: the pages that exist today
 | Page background | `slate-50` | `slate-950` |
 | Surface (cards, header) | `white` + `slate-200` border | `slate-900` + `slate-800` border |
 | Primary button | `slate-900` bg, white text | `white` bg, `slate-900` text |
-| Secondary text | `slate-500` / `slate-600` | `slate-400` / `slate-500` |
+| Secondary text | `slate-500` / `slate-600` | `slate-400` |
 | Error | `red-50` bg, `red-800` text | `red-950` bg, `red-200` text |
 | Notice | `amber-50` bg, `amber-900` text | `amber-950` bg, `amber-200` text |
 
@@ -35,12 +35,12 @@ This document specifies the TrustEval user interface: the pages that exist today
 
 | Value | Badge (verdict) | Text (result status) |
 |---|---|---|
-| PASS / pass | `emerald-600` | `emerald-700` / dark `emerald-400` |
-| WARN / warn | `amber-500` | `amber-700` / dark `amber-400` |
+| PASS / pass | `emerald-700` | `emerald-700` / dark `emerald-400` |
+| WARN / warn | `amber-700` | `amber-700` / dark `amber-400` |
 | FAIL / fail | `red-600` | `red-700` / dark `red-400` |
-| PARTIAL / skipped | `slate-500` | `slate-500` |
+| PARTIAL / skipped | `slate-500` | `slate-500` / dark `slate-400` |
 
-Status is always shown as a word as well as a colour, so it never depends on colour alone.
+Status is always shown as a word as well as a colour, so it never depends on colour alone. Every text and badge pairing meets WCAG AA contrast (4.5:1): white on the badge colours is 4.8–5.5:1, and secondary text is `slate-500` on light surfaces (4.6:1 or better) and `slate-400` on dark ones (7:1).
 
 ## 3. Global layout
 
@@ -166,18 +166,18 @@ Limits come from `src/lib/limits.ts`, the same constants the server validates ag
 
 ## 5. Accessibility
 
-**In place**
-- Each text area is wrapped in its `<label>`; the required field is marked `required`.
-- Mode buttons use `aria-pressed`; the error message uses `role="alert"`.
-- Status is conveyed in text, not only colour.
-- Native buttons and form submission, so keyboard use works throughout.
+Target: WCAG 2.1 AA.
 
-**Gaps to close** (also in `task.md`)
-- Give the mode toggle group an accessible name (`aria-label="Evaluation mode"`).
-- Announce loading and completion with an `aria-live="polite"` region, and move focus to the verdict when a report arrives.
-- Mark pillar bars as decorative (`aria-hidden`), since the number beside them carries the value.
-- Check colour contrast for `amber-500` badges with white text and `slate-500` secondary text in both themes.
-- Visible focus styles on chips and toggle buttons.
+- **Labels:** each text area is wrapped in its `<label>`; the response field is `required`, and the visual asterisk is `aria-hidden`.
+- **Mode toggle:** a `role="group"` named "Evaluation mode", with `aria-pressed` on each button.
+- **Announcements:** a `role="status"` live region, always mounted, says "Evaluating the response…" while a request runs and "Evaluation complete. Verdict …, score … out of 100." when it finishes. Errors use `role="alert"`.
+- **Focus:** when a report arrives, focus moves to its heading (visually hidden, `tabIndex={-1}`), which repeats the verdict and score. The report section is labelled by that heading.
+- **Focus visibility:** example chips, mode buttons, text areas and action buttons show a 2 px outline on keyboard focus (`focus-visible`), in both themes.
+- **Decorative elements:** pillar bars are `aria-hidden`; the number beside each bar carries the value.
+- **Colour:** status is always a word as well as a colour, and all pairings meet AA contrast (§2).
+- **Keyboard:** native buttons and form submission throughout; Ctrl+Enter submits.
+
+**How it's checked:** axe-core (WCAG 2.0/2.1 A and AA rules plus best practices) on `/try` in light and dark mode, before and after a report renders, with zero violations. A Playwright script also confirms focus moves to the report heading, the live-region text, the named mode group and the focus outline. Adding this check to the test suite is tracked in `task.md`.
 
 ## 6. Content guidelines
 

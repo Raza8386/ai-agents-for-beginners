@@ -12,6 +12,7 @@ Status: `[x]` done · `[ ]` to do. Priorities: **P0** before relying on results 
 - [x] Regulatory packs: NCA ECC (6), SAMA (5), PDPL (6), SDAIA AI Ethics (7)
 - [x] Shared regulatory trigger table in `signals.ts`
 - [x] 41 unit tests; typecheck and production build pass
+- [x] Accessibility fixes on `/try`: named mode group, live region, focus to report, decorative bars hidden, AA contrast, visible focus (axe: 0 violations, light and dark)
 - [x] README, `design.md`, `frontend-ui.md`, PR [Raza8386/ai-agents-for-beginners#1](https://github.com/Raza8386/ai-agents-for-beginners/pull/1)
 
 ## P0 — Verify before relying on results
@@ -38,12 +39,7 @@ Status: `[x]` done · `[ ]` to do. Priorities: **P0** before relying on results 
 - [ ] Request logging and monitoring that doesn't store submitted content
 - [ ] Privacy notice on `/try`: what is sent to the judge model and that nothing is stored
 - [ ] UI tests (Playwright) for the form, error states and report rendering
-- [ ] Accessibility fixes (see `frontend-ui.md` §5):
-  - [ ] Accessible name for the mode toggle group
-  - [ ] `aria-live` region for loading and results; move focus to the verdict when a report arrives
-  - [ ] Mark pillar bars `aria-hidden`
-  - [ ] Contrast check for amber badges and secondary text in both themes
-  - [ ] Visible focus styles on example chips and toggle buttons
+- [ ] Add the axe-core accessibility check for `/try` to the automated tests (part of the Playwright UI tests above)
 - [ ] Extract `VerdictBadge`, `PillarScores`, `ResultItem` and `NoticeList` from `/try` into `src/components/`
 - [ ] Decide whether `trust-eval` stays in this course repo or moves to its own repository
 

@@ -1,7 +1,7 @@
 "use client";
 
 import Script from "next/script";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Mode, Report, ResultStatus, Verdict } from "@/lib/types";
 import { PROMPT_MAX, RESPONSE_MAX } from "@/lib/limits";
 
@@ -52,9 +52,14 @@ const EXAMPLES: { label: string; prompt: string; response: string }[] = [
   },
 ];
 
+/** Visible keyboard focus for interactive controls. */
+const FOCUS =
+  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 dark:focus-visible:outline-slate-100";
+
+// Badge colours keep white text at 4.5:1 contrast or better (WCAG AA).
 const VERDICT_STYLE: Record<Verdict, string> = {
-  PASS: "bg-emerald-600",
-  WARN: "bg-amber-500",
+  PASS: "bg-emerald-700",
+  WARN: "bg-amber-700",
   FAIL: "bg-red-600",
   PARTIAL: "bg-slate-500",
 };
@@ -63,7 +68,7 @@ const STATUS_STYLE: Record<ResultStatus, string> = {
   pass: "text-emerald-700 dark:text-emerald-400",
   warn: "text-amber-700 dark:text-amber-400",
   fail: "text-red-700 dark:text-red-400",
-  skipped: "text-slate-500",
+  skipped: "text-slate-500 dark:text-slate-400",
 };
 
 export default function TryPage() {
@@ -115,6 +120,10 @@ export default function TryPage() {
     <div className="space-y-6">
       {SITE_KEY && <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />}
       <h1 className="text-2xl font-bold">Evaluate an AI response</h1>
+      {/* Always mounted so screen readers announce changes to its text. */}
+      <p role="status" className="sr-only">
+        {loading ? "Evaluating the response…" : report ? `Evaluation complete. ${summary(report)}` : ""}
+      </p>
 
       <form
         ref={formRef}
@@ -133,7 +142,7 @@ export default function TryPage() {
             <button
               key={ex.label}
               type="button"
-              className="rounded border border-slate-300 px-2 py-1 hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800"
+              className={`rounded border border-slate-300 px-2 py-1 hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800 ${FOCUS}`}
               onClick={() => {
                 setPrompt(ex.prompt);
                 setResponse(ex.response);
@@ -146,23 +155,23 @@ export default function TryPage() {
 
         <label className="block">
           <span className="text-sm font-medium">
-            User prompt <span className="font-normal text-slate-500">(optional but recommended)</span>
+            User prompt <span className="font-normal text-slate-500 dark:text-slate-400">(optional but recommended)</span>
           </span>
           <textarea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             maxLength={PROMPT_MAX}
             rows={3}
-            className="mt-1 w-full rounded border border-slate-300 bg-transparent p-2 dark:border-slate-700"
+            className={`mt-1 w-full rounded border border-slate-300 bg-transparent p-2 dark:border-slate-700 ${FOCUS}`}
           />
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-slate-500 dark:text-slate-400">
             {prompt.length} / {PROMPT_MAX}
           </span>
         </label>
 
         <label className="block">
           <span className="text-sm font-medium">
-            AI response <span className="text-red-600">*</span>
+            AI response <span aria-hidden="true" className="text-red-600 dark:text-red-400">*</span>
           </span>
           <textarea
             value={response}
@@ -171,39 +180,39 @@ export default function TryPage() {
             rows={8}
             required
             placeholder="Paste your AI's response here to evaluate…"
-            className="mt-1 w-full rounded border border-slate-300 bg-transparent p-2 dark:border-slate-700"
+            className={`mt-1 w-full rounded border border-slate-300 bg-transparent p-2 dark:border-slate-700 ${FOCUS}`}
           />
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-slate-500 dark:text-slate-400">
             {response.length} / {RESPONSE_MAX}
           </span>
         </label>
 
         <div className="flex flex-wrap items-center gap-3">
-          <div className="inline-flex overflow-hidden rounded border border-slate-300 dark:border-slate-700" role="group">
+          <div className="inline-flex overflow-hidden rounded border border-slate-300 dark:border-slate-700" role="group" aria-label="Evaluation mode">
             {(["quick", "standard"] as const).map((m) => (
               <button
                 key={m}
                 type="button"
                 aria-pressed={mode === m}
                 onClick={() => setMode(m)}
-                className={`px-3 py-1.5 text-sm capitalize ${mode === m ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900" : ""}`}
+                className={`px-3 py-1.5 text-sm capitalize ${FOCUS} ${mode === m ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900" : ""}`}
               >
                 {m}
               </button>
             ))}
           </div>
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-slate-500 dark:text-slate-400">
             {mode === "quick" ? "Core evaluators only, fastest." : "Core evaluators plus packs triggered by the content."}
           </span>
           <button
             type="submit"
             disabled={loading || !response.trim()}
-            className="ml-auto rounded bg-slate-900 px-4 py-2 text-white disabled:opacity-40 dark:bg-white dark:text-slate-900"
+            className={`ml-auto rounded bg-slate-900 px-4 py-2 text-white disabled:opacity-40 dark:bg-white dark:text-slate-900 ${FOCUS}`}
           >
             {loading ? "Evaluating…" : "Evaluate now"}
           </button>
         </div>
-        <p className="text-xs text-slate-500">Press Ctrl+Enter to evaluate.</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400">Press Ctrl+Enter to evaluate.</p>
         {SITE_KEY && <div className="cf-turnstile" data-sitekey={SITE_KEY} />}
       </form>
 
@@ -218,19 +227,37 @@ export default function TryPage() {
   );
 }
 
+function summary(report: Report): string {
+  const score = report.overallScore === null ? "no score" : `score ${report.overallScore} out of 100`;
+  return `Verdict ${report.verdict}, ${score}.`;
+}
+
 function ReportView({ report, onDownload }: { report: Report; onDownload: () => void }) {
+  const headingRef = useRef<HTMLHeadingElement>(null);
+
+  // Move focus to the result so keyboard and screen-reader users land on it.
+  useEffect(() => {
+    headingRef.current?.focus();
+  }, [report]);
+
   return (
-    <section className="space-y-4 rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+    <section
+      aria-labelledby="report-heading"
+      className="space-y-4 rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"
+    >
+      <h2 id="report-heading" ref={headingRef} tabIndex={-1} className="sr-only">
+        Evaluation report: {summary(report)}
+      </h2>
       <div className="flex flex-wrap items-center gap-4">
         <span className={`rounded px-3 py-1 text-lg font-bold text-white ${VERDICT_STYLE[report.verdict]}`}>
           {report.verdict}
         </span>
-        <span className="text-2xl font-semibold">{report.overallScore ?? "–"}<span className="text-sm text-slate-500"> / 100</span></span>
-        <span className="text-sm text-slate-500">
+        <span className="text-2xl font-semibold">{report.overallScore ?? "–"}<span className="text-sm text-slate-500 dark:text-slate-400"> / 100</span></span>
+        <span className="text-sm text-slate-500 dark:text-slate-400">
           {report.hardFails} hard-fail · {report.softFails} soft-fail · {(report.durationMs / 1000).toFixed(1)}s
           {report.judgeModel ? ` · judge: ${report.judgeModel}` : ""}
         </span>
-        <button type="button" onClick={onDownload} className="ml-auto rounded border border-slate-300 px-3 py-1 text-sm dark:border-slate-700">
+        <button type="button" onClick={onDownload} className={`ml-auto rounded border border-slate-300 px-3 py-1 text-sm dark:border-slate-700 ${FOCUS}`}>
           Export JSON
         </button>
       </div>
@@ -244,16 +271,16 @@ function ReportView({ report, onDownload }: { report: Report; onDownload: () => 
       <div className="grid gap-2 sm:grid-cols-5">
         {Object.entries(report.pillarScores).map(([pillar, score]) => (
           <div key={pillar} className="rounded border border-slate-200 p-2 dark:border-slate-800">
-            <div className="text-xs capitalize text-slate-500">{pillar}</div>
+            <div className="text-xs capitalize text-slate-500 dark:text-slate-400">{pillar}</div>
             <div className="font-semibold">{score}</div>
-            <div className="mt-1 h-1.5 rounded bg-slate-200 dark:bg-slate-800">
+            <div aria-hidden="true" className="mt-1 h-1.5 rounded bg-slate-200 dark:bg-slate-800">
               <div className="h-1.5 rounded bg-slate-900 dark:bg-slate-100" style={{ width: `${score}%` }} />
             </div>
           </div>
         ))}
       </div>
 
-      <p className="text-sm text-slate-500">
+      <p className="text-sm text-slate-500 dark:text-slate-400">
         Packs run: core{report.packsRun.length ? `, ${report.packsRun.join(", ")}` : ""}
       </p>
 
@@ -263,7 +290,7 @@ function ReportView({ report, onDownload }: { report: Report; onDownload: () => 
             <div className="flex flex-wrap items-baseline gap-2">
               <span className={`text-sm font-bold uppercase ${STATUS_STYLE[r.status]}`}>{r.status}</span>
               <span className="font-medium">{r.name}</span>
-              <span className="text-xs text-slate-500">
+              <span className="text-xs text-slate-500 dark:text-slate-400">
                 {r.pillar} · {r.severity}-fail · {r.kind === "rule" ? "rule" : "LLM judge"}
                 {r.score !== null ? ` · ${r.score}` : ""}
               </span>
