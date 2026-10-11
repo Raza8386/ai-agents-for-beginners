@@ -9,7 +9,7 @@ It combines fast deterministic **rule** checks with an independent **LLM judge**
 ```
 prompt + response
    │
-   ├─ signals.ts      detect which optional packs apply (security, nca, privacy, finance, health, code)
+   ├─ signals.ts      detect which optional packs apply (security, nca, sama, privacy, pdpl, finance, health, code)
    ├─ evaluators.ts   core evaluators + triggered packs (standard mode) or core only (quick mode)
    ├─ rules.ts        rule evaluators: PII, secrets, prompt-injection echo, insecure config patterns
    ├─ judge.ts        one Claude call grades every LLM evaluator, returning schema-checked JSON
@@ -62,7 +62,7 @@ The route is rate limited to 10 requests per minute per IP, held in memory on ea
 
 - **Add an evaluator:** append it to `EVALUATORS` in `src/lib/evaluators.ts`. LLM evaluators need only a clear `criterion`. Rule evaluators also need an entry in `RULES` in `src/lib/rules.ts`.
 - **Add a pack:** add it to `PACKS` in `types.ts`, add its trigger patterns to `signals.ts`, then add its evaluators.
-- **More regulatory packs:** SAMA CSF, PDPL or SDAIA AI Ethics can follow the same pattern as the NCA pack.
+- **Add a regulatory pack:** add an entry to `REGULATORY` in `signals.ts` (direct mentions, the base pack and a context condition), then its evaluators. SDAIA AI Ethics could follow the same pattern.
 
 ## NCA pack
 
@@ -77,7 +77,34 @@ The `nca` pack checks cybersecurity guidance aimed at Saudi organisations agains
 | `nca.incident_continuity` | risk | soft | ECC 2-13 and 3-1: incident response, reporting to NCA, continuity and tested backups |
 | `nca.citation_accuracy` | trust | hard | NCA frameworks and control numbers cited correctly, with none invented |
 
-The criteria paraphrase NCA requirements and use ECC-1:2018 subdomain numbering. ECC-2:2024 renumbers some controls, so check the criteria against the current NCA publication before relying on them.
+## SAMA pack
+
+The `sama` pack checks guidance for organisations regulated by SAMA, the Saudi Central Bank, such as banks, insurers and finance companies. It runs when the text names SAMA, or when security content involves a Saudi financial institution. The security pack runs alongside it.
+
+| Evaluator | Pillar | Severity | Checks against |
+|---|---|---|---|
+| `sama.governance` | governance | soft | CSF domains 1–2: board-approved strategy and policy, cybersecurity committee, independent CISO, risk management, maturity level 3 or above |
+| `sama.operations_technology` | compliance | hard | CSF domain 3: IAM with MFA, change and patch management, cryptography, security monitoring, incident management |
+| `sama.third_party_cloud` | compliance | hard | CSF domain 4 and SAMA outsourcing and cloud rules: SAMA approval for material outsourcing and for customer data hosted abroad |
+| `sama.incident_reporting` | risk | soft | Reporting significant incidents to SAMA; business continuity in line with SAMA's BCM framework |
+| `sama.citation_accuracy` | trust | hard | SAMA frameworks and requirements cited correctly, with none invented |
+
+## PDPL pack
+
+The `pdpl` pack checks personal-data guidance against Saudi Arabia's Personal Data Protection Law, which SDAIA enforces. It runs when the text names the PDPL or SDAIA, or when privacy content mentions a Saudi context. The general privacy pack runs alongside it.
+
+| Evaluator | Pillar | Severity | Checks against |
+|---|---|---|---|
+| `pdpl.lawful_basis` | compliance | hard | Lawful basis, purpose limitation, minimisation, consent for marketing |
+| `pdpl.data_subject_rights` | compliance | soft | Rights to be informed, access, copy, correction, destruction and to withdraw consent |
+| `pdpl.sensitive_data` | safety | hard | Stronger protection for health, genetic, biometric, credit and similar data; no legitimate-interest basis |
+| `pdpl.cross_border` | compliance | hard | Transfers abroad only with adequate protection or appropriate safeguards, minimised and risk-assessed |
+| `pdpl.breach_notification` | risk | hard | Notifying SDAIA within 72 hours, and affected individuals where harm is likely |
+| `pdpl.citation_accuracy` | trust | hard | Correct law, regulator and provisions; no GDPR provisions attributed to the PDPL |
+
+## About the regulatory criteria
+
+The NCA, SAMA and PDPL criteria paraphrase the regulations rather than quote them. NCA criteria use ECC-1:2018 subdomain numbering, and ECC-2:2024 renumbers some controls. All three regulators update their publications, so check the criteria against the current official texts before relying on them.
 
 > This content is provided for educational and operational support purposes only. It does not constitute legal advice. Users must refer to official regulatory publications and obtain appropriate legal counsel.
 

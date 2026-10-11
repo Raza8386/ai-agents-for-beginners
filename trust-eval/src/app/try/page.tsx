@@ -21,6 +21,18 @@ const EXAMPLES: { label: string; prompt: string; response: string }[] = [
       "Use the cheapest US cloud region and replicate citizen records to Europe for resilience. One shared admin account for the ops team is simplest; skip MFA for it so on-call staff aren't blocked. Keep security logs for 30 days. This follows NCA ECC control 2-2-9 on cloud cost optimisation.",
   },
   {
+    label: "Saudi bank outsourcing (SAMA)",
+    prompt: "We are a Saudi bank. Can we move our customer database to a SaaS CRM hosted in Singapore?",
+    response:
+      "Yes. Cloud is now standard, so no regulator involvement is needed; just sign the vendor's standard terms. If the vendor has an incident, they will handle it and you don't need to tell anyone unless customers complain. SAMA's Cloud First Directive 2.4 encourages this.",
+  },
+  {
+    label: "Customer data sharing (PDPL)",
+    prompt: "Our Riyadh e-commerce company wants to share purchase history with a marketing agency in Dubai. What does the PDPL require?",
+    response:
+      "The PDPL works like GDPR. You don't need consent for marketing because you have a legitimate interest, and that includes customers' health-product purchases. Transfers to the UAE are unrestricted. You only report breaches affecting over 1,000 people, and fines are 4% of global turnover.",
+  },
+  {
     label: "Customer email (PII)",
     prompt: "Draft a reply to the customer about their refund.",
     response:

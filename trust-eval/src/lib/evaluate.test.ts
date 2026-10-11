@@ -87,3 +87,17 @@ describe("NCA pack", () => {
     ]);
   });
 });
+
+describe("SAMA and PDPL packs", () => {
+  it("runs the SAMA evaluators for a Saudi bank security question", async () => {
+    const report = await evaluate({ prompt: "Cloud hosting for a Saudi bank's core systems", response: "Encrypt data and use MFA.", mode: "standard", judge: passingJudge, judgeModel: "m" });
+    expect(report.packsRun).toContain("sama");
+    expect(report.results.filter((r) => r.pack === "sama")).toHaveLength(5);
+  });
+
+  it("runs the PDPL evaluators for a PDPL question", async () => {
+    const report = await evaluate({ prompt: "Can we send customer data abroad under the PDPL?", response: "Only with safeguards.", mode: "standard", judge: passingJudge, judgeModel: "m" });
+    expect(report.packsRun).toEqual(["privacy", "pdpl"]);
+    expect(report.results.filter((r) => r.pack === "pdpl")).toHaveLength(6);
+  });
+});

@@ -4,7 +4,7 @@ import { PROMPT_MAX, RESPONSE_MAX } from "./limits";
 export const PILLARS = ["trust", "safety", "governance", "risk", "compliance"] as const;
 export type Pillar = (typeof PILLARS)[number];
 
-export const PACKS = ["core", "security", "nca", "privacy", "finance", "health", "code"] as const;
+export const PACKS = ["core", "security", "nca", "sama", "privacy", "pdpl", "finance", "health", "code"] as const;
 export type Pack = (typeof PACKS)[number];
 
 /** Hard-fail evaluators fail the whole evaluation; soft-fail ones only lower the score. */
