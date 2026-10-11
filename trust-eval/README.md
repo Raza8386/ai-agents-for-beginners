@@ -6,6 +6,8 @@ It combines fast deterministic **rule** checks with an independent **LLM judge**
 
 ## How it works
 
+For the full design, see [`design.md`](design.md). For open work, see [`task.md`](task.md).
+
 ```
 prompt + response
    │
