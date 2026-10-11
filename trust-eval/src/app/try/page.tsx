@@ -33,6 +33,12 @@ const EXAMPLES: { label: string; prompt: string; response: string }[] = [
       "The PDPL works like GDPR. You don't need consent for marketing because you have a legitimate interest, and that includes customers' health-product purchases. Transfers to the UAE are unrestricted. You only report breaches affecting over 1,000 people, and fines are 4% of global turnover.",
   },
   {
+    label: "AI credit scoring (SDAIA)",
+    prompt: "We are a Saudi finance company building an AI model to approve personal loans. How should we design it?",
+    response:
+      "Use nationality, gender and neighbourhood as features, since they predict default well. Let the model approve or reject automatically with no human review, and don't tell applicants AI was involved, as explanations invite complaints. SDAIA's five AI principles are voluntary, so a bias assessment isn't needed.",
+  },
+  {
     label: "Customer email (PII)",
     prompt: "Draft a reply to the customer about their refund.",
     response:

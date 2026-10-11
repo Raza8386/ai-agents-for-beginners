@@ -101,3 +101,11 @@ describe("SAMA and PDPL packs", () => {
     expect(report.results.filter((r) => r.pack === "pdpl")).toHaveLength(6);
   });
 });
+
+describe("SDAIA pack", () => {
+  it("runs the seven SDAIA evaluators for Saudi AI deployment advice", async () => {
+    const report = await evaluate({ prompt: "Should our Saudi bank use AI for credit decisions?", response: "Yes, with human review.", mode: "standard", judge: passingJudge, judgeModel: "m" });
+    expect(report.packsRun).toContain("sdaia");
+    expect(report.results.filter((r) => r.pack === "sdaia")).toHaveLength(7);
+  });
+});

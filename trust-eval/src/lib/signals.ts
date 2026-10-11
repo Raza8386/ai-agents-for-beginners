@@ -53,17 +53,20 @@ const SAUDI_CONTEXT: RegExp[] = [
   /السعودية|المملكة/,
 ];
 
+const AI_TOPIC =
+  /\b(AI|artificial intelligence|machine learning|ML models?|LLMs?|large language models?|chatbots?|generative|neural networks?|algorithms?|algorithmic|automated decisions?)\b/i;
+
 const FINANCIAL_INSTITUTION = /\b(bank(s|ing)?|insurer|insurance|fintech|payment service|financ(e|ing) compan(y|ies)|exchange house)\b/i;
 
-type RegulatoryPack = "nca" | "sama" | "pdpl";
+type RegulatoryPack = "nca" | "sama" | "pdpl" | "sdaia";
 
 interface RegulatoryTrigger {
   pack: RegulatoryPack;
-  /** The general pack that always runs alongside this one. */
-  base: Exclude<OptionalPack, RegulatoryPack>;
+  /** The general pack that always runs alongside this one, if any. */
+  base?: Exclude<OptionalPack, RegulatoryPack>;
   /** Naming the regulator or its frameworks triggers the pack on its own. */
   direct: RegExp[];
-  /** Otherwise, the pack triggers when its base pack fired and this condition holds. */
+  /** Otherwise, the pack triggers when this condition holds and its base pack (if any) fired. */
   inContext: (text: string) => boolean;
 }
 
@@ -96,10 +99,17 @@ const REGULATORY: RegulatoryTrigger[] = [
       /\bPDPL\b/,
       /Personal Data Protection Law/i,
       /نظام حماية البيانات الشخصية/,
-      /\bSDAIA\b/,
-      /Saudi Data (and|&) (AI|Artificial Intelligence) Authority/i,
     ],
     inContext: saudi,
+  },
+  {
+    pack: "sdaia",
+    direct: [
+      /\bSDAIA\b.{0,40}\b(AI )?ethic/i,
+      /\bAI Ethics Principles\b/i,
+      /مبادئ أخلاقيات الذكاء الاصطناعي/,
+    ],
+    inContext: (text) => saudi(text) && AI_TOPIC.test(text),
   },
 ];
 
@@ -112,10 +122,10 @@ export function detectPacks(prompt: string, response: string): Pack[] {
     (Object.keys(SIGNALS) as (keyof typeof SIGNALS)[]).filter((pack) => hit(SIGNALS[pack])),
   );
   for (const { pack, base, direct, inContext } of REGULATORY) {
-    if (hit(direct) || (triggered.has(base) && inContext(text))) {
+    if (hit(direct) || ((!base || triggered.has(base)) && inContext(text))) {
       triggered.add(pack);
       // Regulatory guidance is also general guidance of its kind, so the base pack runs alongside.
-      triggered.add(base);
+      if (base) triggered.add(base);
     }
   }
 

@@ -56,6 +56,24 @@ describe("detectPacks", () => {
     ]);
   });
 
+  it("triggers the SDAIA pack when the AI Ethics Principles are named", () => {
+    expect(detectPacks("Does our chatbot meet SDAIA's AI ethics principles?", "Mostly.")).toEqual(["sdaia"]);
+  });
+
+  it("triggers the SDAIA pack for AI content in a Saudi context", () => {
+    expect(detectPacks("We are deploying a machine learning model for hiring in Riyadh", "Test it for bias.")).toEqual([
+      "sdaia",
+    ]);
+  });
+
+  it("does not mistake words like 'aim' for AI", () => {
+    expect(detectPacks("Our Riyadh team aims to open a new store", "We aim for March.")).toEqual([]);
+  });
+
+  it("does not trigger the PDPL pack for a bare SDAIA mention", () => {
+    expect(detectPacks("Who leads SDAIA?", "Its president.")).toEqual([]);
+  });
+
   it("returns no packs for neutral text", () => {
     expect(detectPacks("Write a haiku about autumn", "Leaves drift on the pond.")).toEqual([]);
   });
